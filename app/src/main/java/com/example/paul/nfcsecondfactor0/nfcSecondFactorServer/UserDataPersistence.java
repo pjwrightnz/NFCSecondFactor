@@ -10,7 +10,7 @@ import java.util.HashMap;
  *
  * @author Paul Wright
  * @version 1.0 Prototype 1. Activities, intents and servers.
- * @see #checkUserData(String userID)
+ * @see #checkUserExists(String userID)
  * @see #addNewUser(User newUser)
  * @see #getUser(String userID)
  */
@@ -21,22 +21,38 @@ public class UserDataPersistence {
      */
     public static HashMap<String, User> userData = new HashMap<String, User>();
 
-    //checkUser Exists
-    public boolean checkUserData(String userID) {
+    /**
+     * Method to
+     * @param userID
+     * @return
+     */
+    public boolean checkUserExists(String userID) {
         if (userData.containsKey(userID)) {
             return true;
         } else {
             return false;
         }
     }
-    // method to add user on registration
+
+    /**
+     * Method to add a new user to the Hashmap
+     * @param newUser
+     */
     public void addNewUser(User newUser) {
         userData.put(newUser.userID, newUser);
     }
 
-    //method to get existing user
+    /**
+     * method to get existing user from the Hashmap
+     * @param userID
+     * @return
+     */
     public User getUser(String userID) {
-        User existingUser = userData.get(userID);
+        User existingUser = null;
+        if(checkUserExists(userID))
+        {       existingUser = userData.get(userID);
+        return existingUser;
+        }
         return  existingUser;
     }
 

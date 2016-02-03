@@ -17,33 +17,58 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-import java.io.File;
-
 import com.example.paul.nfcsecondfactor0.R;
 import com.example.paul.nfcsecondfactor0.nfcSecondFactorServer.MockServer;
 import com.example.paul.nfcsecondfactor0.nfcSecondFactorServer.UserDataPersistence;
 
+
+/**
+ *  Main Activity is the front activity of the app and provides the methods for logging a user in.
+ *  onCreate() sets up the Acivity. authUser() authenticates a user based on the text and nfc
+ *  card inputs. showtoast() provides a simple method for throwing toasts. onResume() and onPause()
+ *  provide the means for disabling the app when it is in the background and then reenabling it when
+ *  it is in the foreground. onActivityResult listens for intents returned from the Registration
+ *  Activity and fills in the UserID field when a new User is registered. OnNewIntent listens for
+ *  NFC Activity. bytesToHex converts nfc CardIDs from hex to string to allow persistence of the
+ *  NFC Card ID.
+ *
+ * @author Paul Wright
+ * @version 1.0 Prototype 1. Activities, intents and servers.
+ * @version 1.1 Prototype 2. Add NFC Functionality.
+ * @see #onCreate(Bundle savedInstanceState)
+ * @see #authUser()
+ * @see #showToast(String string)
+ * @see #onNewIntent(Intent intent)
+ * @see #bytesToHexString(byte[] src)
+ * @see #onResume()
+ * @see #onPause()
+ * @see #onActivityResult(int requestCode, int resultCode, Intent data)
+ *
+ */
 public class MainActivity extends AppCompatActivity {
 
-    public static String userID, nfcCardID;
-    public static File file;
-    ImageView btLogo, yorkLogo, nfcLogo, loginIcon, pwIcon;
-    TextView registerTextView;
-    Boolean loginAccepted = false;
-    EditText userIDInput, passwordInput;
-    Button loginButton, registerButton;
-    MockServer mockServer = new MockServer();
-    UserDataPersistence udp = new UserDataPersistence();
+    /**
+     * Private variables utilised by the main activity.
+     */
+    private static String userID, nfcCardID;
+    private ImageView btLogo, yorkLogo, nfcLogo, loginIcon, pwIcon;
+    private EditText userIDInput, passwordInput;
+    private Button loginButton, registerButton;
+    private MockServer mockServer = new MockServer();
+    private UserDataPersistence udp = new UserDataPersistence();
     private NfcAdapter loginNfcAdapter;
 
+
+    /**
+     * The onCreate method sets up the Main Activity graphical UI and listeners.
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        file = getFilesDir();
-
-        // set Icon
+         // set Icon
         ActionBar menu = getSupportActionBar();
         menu.setDisplayShowHomeEnabled(true);
         menu.setLogo(R.drawable.nfcsign);
@@ -116,6 +141,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Method for authenticating a user. Switch case used to mock the handling of the various faults
+     * the server can throw and appropriate output to the user.
+     */
     private void authUser() {
         int auth = mockServer.authenticateUser(userIDInput.getText().toString(), passwordInput.getText().toString(), nfcCardID);
         switch (auth) {
@@ -126,6 +155,8 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case 1:
                 showToast("Your NFC Card did not match the card registered for your account, please try again.");
+                nfcLogo.setImageResource(R.drawable.nfclogo);
+                getWindow().getDecorView().findViewById(android.R.id.content).invalidate();
                 break;
             case 2:
                 showToast("Your password did not match the password for your account, please try again.");
@@ -135,17 +166,25 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Method for simplifying throwing toasts.
+     * @param string
+     */
     private void showToast(String string) {
         Toast.makeText(getApplicationContext(), string, Toast.LENGTH_LONG).show();
     }
 
-    //    method is called when a new intent is thrown to the main activity. The logic then handles the
-//     NFC data and captures the Ndef information and parses it. The card ID is then added to the userID
-//     and password and sent to the server for authentication
+
+
+    /**
+     * Method is called when a new intent is thrown to the main activity. The logic then handles the
+     * NFC data and captures the Ndef information and parses it. The card ID is then added to the userID
+     * and password and sent to the server for authentication.
+     * @param intent
+     */
     @Override
     public void onNewIntent(Intent intent) {
         Tag myTag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-        Log.i("tag ID", bytesToHexString(myTag.getId()));
         mockServer.seedUserData();
 
         if (myTag != null) {
@@ -155,16 +194,22 @@ public class MainActivity extends AppCompatActivity {
             Log.i("tag ID", nfcCardID);
             Log.i("User", udp.getUser("Test").toString());
         }
-        //super.onNewIntent(intent);
+        super.onNewIntent(intent);
     }
 
     // this method takes in a Byte Array and returns a String, utilising a Stroing Builder.
+
+    /**
+     * Method takes in a Byte Array and returns a String, utilising a String Builder. Converts
+     * NFC Card ID to String for registration and persistence.
+     * @param src
+     * @return
+     */
     private String bytesToHexString(byte[] src) {
         StringBuilder stringBuilder = new StringBuilder("0x");
         if (src == null || src.length <= 0) {
             return null;
         }
-
         char[] buffer = new char[2];
         for (int i = 0; i < src.length; i++) {
             buffer[0] = Character.forDigit((src[i] >>> 4) & 0x0F, 16);
@@ -174,7 +219,18 @@ public class MainActivity extends AppCompatActivity {
         return stringBuilder.toString();
     }
 
-    //if app is paused, the NFC Adaptor is paused. On resume the adaptor is started again.
+    /**
+     * When app is paused, the NFC Adaptor is paused. This is to ensure the app does not interfere with other NFC apps.
+     */
+    @Override
+    protected void onPause() {
+        loginNfcAdapter.disableForegroundDispatch(this);
+        super.onPause();
+    }
+
+    /**
+     * When app is paused, the NFC Adaptor is paused. On resume the adaptor is started again.
+     */
     @Override
     protected void onResume() {
         Intent intent = new Intent(this, MainActivity.class);
@@ -186,16 +242,15 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
     }
 
-    //if app is paused, the NFC Adaptor is paused. This is to ensure the app does not interefer with other NFC apps.
-    @Override
-    protected void onPause() {
-        loginNfcAdapter.disableForegroundDispatch(this);
-        super.onPause();
-    }
-
+    /**
+     * Method listens for intents and with a result code of one it adds the newly registered
+     * userID to the login UserID field.
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-
         if (resultCode == 1) {
             userIDInput.setText(data.getStringExtra(MainActivity.userID));
         }

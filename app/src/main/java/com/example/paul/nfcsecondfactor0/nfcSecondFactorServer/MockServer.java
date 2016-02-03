@@ -39,7 +39,7 @@ public class MockServer {
         User newUser = new User(userID, password, email, nfcCardID);
         //check if user already exists, return false else add user to the Map. Map used instead of
         //data persistence via hashmap to keep app lite for proof of concept only.
-        if (udp.checkUserData(userID)) {
+        if (udp.checkUserExists(userID)) {
             return false;
         } else {
             udp.addNewUser(newUser);
@@ -48,18 +48,18 @@ public class MockServer {
     }
 
     /**
+     * Method to authenticate an already registered user. return values simulate faults that a
+     * server would throw for various failed/successful login attempts.
      *
      * @param userID
      * @param password
      * @param nfcCardID
      * @return returnValue
      *
-     * Method to authenticate an already registered user. return values simulate faults that a
-     * server would throw for various failed/successful login attempts.
      */
     public int authenticateUser(String userID, String password, String nfcCardID) {
         int returnValue = DEFAULT;
-        if (udp.checkUserData(userID)) {
+        if (udp.checkUserExists(userID)) {
             returnValue = PASSWORD_FAILED;
             if (udp.getUser(userID).password.equals(password)) {
                 returnValue = NFC_FAILED;
@@ -73,6 +73,10 @@ public class MockServer {
 
     /**
      * Method to seed the Server with an already registered user.
+     */
+
+    /**
+     * Method for test puposes only. Seeds the Hashmap with a user for proof only.
      */
     public void seedUserData() {
         registerUser("Test", "pass", "email", "0x6f936924");
