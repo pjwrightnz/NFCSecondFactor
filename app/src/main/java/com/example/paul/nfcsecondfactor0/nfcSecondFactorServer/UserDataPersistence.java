@@ -2,9 +2,7 @@ package com.example.paul.nfcsecondfactor0.nfcSecondFactorServer;
 
 import java.util.HashMap;
 
-/**
- * Created by Paul on 23/01/2016.
- */
+
 public class UserDataPersistence {
 
     //static hashmap for user data, string is userID, user has all user data
