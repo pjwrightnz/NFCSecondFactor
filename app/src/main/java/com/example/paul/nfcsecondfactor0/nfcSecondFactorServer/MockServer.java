@@ -7,8 +7,8 @@ package com.example.paul.nfcsecondfactor0.nfcSecondFactorServer;
  *  purposes to seed user data.
  *
  * @author Paul Wright
- * @version 1.0 Prototype 1. Activities and intents only.
- * @version 1.1 Prototype 2. NFC Functionality.
+ * @version 1.0 Prototype 1. Activities, intents and servers.
+ * @version 1.1 Prototype 2. Add NFC Functionality.
  * @see #registerUser(String userID, String password, String email, String nfcCardID)
  * @see #authenticateUser(String userID, String password, String nfcCardID)
  * @see #seedUserData( )
