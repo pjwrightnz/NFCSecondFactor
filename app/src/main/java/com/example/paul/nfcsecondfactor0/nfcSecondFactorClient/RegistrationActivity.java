@@ -42,7 +42,7 @@ public class RegistrationActivity extends AppCompatActivity {
     private Button createAccountButton;
     private EditText userIDEditText, passwordEditText, reenterPasswordEditText, emailEditText;
     private ImageView nfcLogo, bTLogo, yorkLogo, loginIcon, pwIcon, emailIcon, repwIcon;
-    private String nfcCardID = "";
+    private String nfcCardID = null;
     private MockServer mockServer = new MockServer();
     private PendingIntent pendingIntent;
 

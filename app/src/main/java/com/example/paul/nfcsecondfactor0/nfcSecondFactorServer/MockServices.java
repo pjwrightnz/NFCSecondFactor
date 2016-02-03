@@ -1,7 +1,7 @@
 package com.example.paul.nfcsecondfactor0.nfcSecondFactorServer;
 
 /**
- *  MockServer class which mocks a registration/authentication service. It has two primary methods -
+ *  MockServices class which mocks a registration and authentication services. It has two primary methods -
  *  register user (add a new user to the database) and authenticate user (confirm a user's ID,
  *  password and NFC Card Match). Additionally, a seedUserData method is used for demonstration
  *  purposes to seed user data.
@@ -15,7 +15,7 @@ package com.example.paul.nfcsecondfactor0.nfcSecondFactorServer;
  *
  */
 
-public class MockServer {
+public class MockServices {
 
     UserDataPersistence udp = new UserDataPersistence();
     int DEFAULT = 3;
