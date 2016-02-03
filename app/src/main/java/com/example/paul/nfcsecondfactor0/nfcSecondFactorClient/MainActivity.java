@@ -24,7 +24,7 @@ import com.example.paul.nfcsecondfactor0.nfcSecondFactorServer.UserDataPersisten
 
 /**
  *  Main Activity is the front activity of the app and provides the methods for logging a user in.
- *  onCreate() sets up the Acivity. authUser() authenticates a user based on the text and nfc
+ *  onCreate() sets up the Activity. authUser() authenticates a user based on the text and nfc
  *  card inputs. showtoast() provides a simple method for throwing toasts. onResume() and onPause()
  *  provide the means for disabling the app when it is in the background and then reenabling it when
  *  it is in the foreground. onActivityResult listens for intents returned from the Registration

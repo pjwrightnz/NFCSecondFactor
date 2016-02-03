@@ -11,33 +11,45 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
-
 import com.example.paul.nfcsecondfactor0.R;
 import com.example.paul.nfcsecondfactor0.nfcSecondFactorServer.MockServer;
 import com.example.paul.nfcsecondfactor0.nfcSecondFactorServer.UserDataPersistence;
 
+
+/**
+ *  Registration Activity is the registration activity of the app and provides the methods for
+ *  creating a new user. onCreate() sets up the Activity. onResume() and onPause()
+ *  provide the means for disabling the app when it is in the background and then reenabling it when
+ *  it is in the foreground. onActivityResult listens for intents returned from the Registration
+ *  Activity and fills in the UserID field when a new User is registered. OnNewIntent listens for
+ *  NFC Activity. bytesToHex converts nfc CardIDs from hex to string to allow persistence of the
+ *  NFC Card ID. checkNull provides logic for checking if new user details are null and advising
+ *  the user.
+ *
+ * @author Paul Wright
+ * @version 1.0 Prototype 1. Activities, intents and servers.
+ * @version 1.1 Prototype 2. Add NFC Functionality.
+ * @see #onCreate(Bundle savedInstanceState)
+ * @see #checkNull(String input)
+ * @see #onResume()
+ * @see #onNewIntent(Intent)
+ * @see #bytesToHexString(byte[])
+ *
+ */
 public class RegistrationActivity extends AppCompatActivity {
 
-    //registration activity for creating a new account
-    Button createAccountButton;
-    EditText userIDEditText, passwordEditText, reenterPasswordEditText, emailEditText;
-    ImageView nfcLogo, bTLogo, yorkLogo, loginIcon, pwIcon, emailIcon, repwIcon;
-    String nfcCardID = "";
-    MockServer mockServer = new MockServer();
-    private NfcAdapter registerNfcAdapter;
+    //registration activity private attributes.
+    private Button createAccountButton;
+    private EditText userIDEditText, passwordEditText, reenterPasswordEditText, emailEditText;
+    private ImageView nfcLogo, bTLogo, yorkLogo, loginIcon, pwIcon, emailIcon, repwIcon;
+    private String nfcCardID = "";
+    private MockServer mockServer = new MockServer();
+    private PendingIntent pendingIntent;
 
-    //pending intent is utilised to for nfc tag activty. It is enabled in onResume and intents are
-    //caught by the on New Intent Activity.
-    PendingIntent pendingIntent;
-
-    public static Boolean checkNull(String input) {
-        if (input.isEmpty()) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
+    /**
+     * The onCreate method sets up the Register User Activity graphical UI and listeners.
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -103,7 +115,7 @@ public class RegistrationActivity extends AppCompatActivity {
                     mockServer.registerUser(userIDEditText.getText().toString(), passwordEditText.getText().toString(), emailEditText.getText().toString(), nfcCardID);
                     //add to hashmap and return to main intent
                     Intent returnToMainIntent = new Intent(RegistrationActivity.this, MainActivity.class);
-                    returnToMainIntent.putExtra(MainActivity.userID, userIDEditText.getText().toString());
+                    returnToMainIntent.putExtra(userIDEditText.getText().toString(), userIDEditText.getText().toString());
                     setResult(1, returnToMainIntent);
                     finish();
                     Toast.makeText(getApplicationContext(), "Your account has been created.", Toast.LENGTH_SHORT).show();
@@ -111,7 +123,24 @@ public class RegistrationActivity extends AppCompatActivity {
             }
         });
     }
-    // handles new intents from NFC Cards
+
+    /**
+     * Method for checking user input is null.
+     * @param input
+     * @return
+     */
+    public static Boolean checkNull(String input) {
+        if (input.isEmpty()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Method filters for and acts on NFC intents.
+     * @param intent
+     */
     @Override
     public void onNewIntent(Intent intent) {
         Tag myTag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
@@ -122,7 +151,13 @@ public class RegistrationActivity extends AppCompatActivity {
             nfcCardID = bytesToHexString(myTag.getId());
         }
     }
-    //converts tags from Hex to String
+
+    /**
+     * Method takes in a Byte Array and returns a String, utilising a String Builder. Converts
+     * NFC Card ID to String for registration and persistence.
+     * @param src
+     * @return
+     */
     private String bytesToHexString(byte[] src) {
         StringBuilder stringBuilder = new StringBuilder("0x");
         if (src == null || src.length <= 0) {
@@ -138,11 +173,23 @@ public class RegistrationActivity extends AppCompatActivity {
         return stringBuilder.toString();
     }
 
-    //enables forground NFC card read
+    /**
+     * When app is paused, the NFC Adaptor is paused. On resume the adaptor is started again.
+     */
     @Override
     protected void onResume() {
         NfcAdapter nfcAdapter = NfcAdapter.getDefaultAdapter(this);
         nfcAdapter.enableForegroundDispatch(this, pendingIntent, null, null);
         super.onResume();
+    }
+
+    /**
+     * When app is paused, the NFC Adaptor is paused. This is to ensure the app does not interfere with other NFC apps.
+     */
+    @Override
+    protected void onPause() {
+        NfcAdapter nfcAdapter = NfcAdapter.getDefaultAdapter(this);
+        nfcAdapter.disableForegroundDispatch(this);
+        super.onPause();
     }
 }
