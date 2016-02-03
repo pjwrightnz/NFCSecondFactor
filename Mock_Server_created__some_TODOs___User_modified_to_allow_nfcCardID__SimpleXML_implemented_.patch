@@ -1,0 +1,163 @@
+Index: app/src/main/java/com/example/paul/nfcsecondfactor0/MockServer.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/example/paul/nfcsecondfactor0/MockServer.java	(revision b81e5ce7b480ce161ae77698d85cf3fe59513413)
++++ app/src/main/java/com/example/paul/nfcsecondfactor0/MockServer.java	(revision )
+@@ -1,40 +1,59 @@
+ package com.example.paul.nfcsecondfactor0;
+ 
++import android.util.Log;
++
++import org.simpleframework.xml.core.Persister;
++
++import java.io.File;
++
+ /**
+  * Created by Paul on 1/02/2016.
+  */
+ public class MockServer {
+ 
++    Persister persister = new Persister();
++    File file;
++
+     /*
+      * service to create/register a new user.
+-
+-
+      */
+ 
+-    public void registerUser(String userID, String email, String password, String nfcCardID) {
++    public Boolean registerUser(String userID, String email, String password, String nfcCardID) {
+ 
++        Boolean userRegistered = false;
+-       //create new user, check if user already exists
++        //create new user, check if user already exists
+         User newUser = new User(userID, password, nfcCardID, email);
+ 
+-        //persistance for the user
+-        //TODO
+-
++        file = new File("StoredData/"+userID+".xml");
++        //persistance for the user, exc exception thrown
++        try {
++            persister.write(newUser, file);
++            userRegistered = true;
++        } catch (Exception e) {
++            Log.d("File Handling Error", e.toString());
+-    }
++        }
++        return userRegistered;
++    }
+ 
+     public Boolean authenticateUser(String userID, String password, String nfcCardID) {
+ 
++        file = new File("StoredData/"+userID+".xml");
+         //get user, check if password matches
+-        User regUser = get user from persistance
++        User regUser = null;
++        try {
++            regUser = persister.read(User.class, file);
++        } catch (Exception e) {
++            e.printStackTrace();
++            return false;
++        }
+ 
+-        if (regUser.getPassword() == password && regUser.getnfcCardID == nfcCardID) {
++        if (regUser.getPassword() == password && regUser.getNfcCardID() == nfcCardID) {
+             return true;
+-        }else {
++        } else {
+ 
+-            return true;
++            return false;
+         }
+     }
+-
+-
+ 
+ 
+ }
+Index: app/src/main/java/com/example/paul/nfcsecondfactor0/TagReadTask.java
+===================================================================
+--- app/src/main/java/com/example/paul/nfcsecondfactor0/TagReadTask.java	(revision b81e5ce7b480ce161ae77698d85cf3fe59513413)
++++ app/src/main/java/com/example/paul/nfcsecondfactor0/TagReadTask.java	(revision b81e5ce7b480ce161ae77698d85cf3fe59513413)
+@@ -1,13 +0,0 @@
+-package com.example.paul.nfcsecondfactor0;
+-
+-import android.nfc.NdefMessage;
+-import android.nfc.NdefRecord;
+-import android.nfc.Tag;
+-import android.nfc.tech.Ndef;
+-import android.os.AsyncTask;
+-
+-import java.io.UnsupportedEncodingException;
+-import java.util.Arrays;
+-
+-
+-
+Index: app/src/main/java/com/example/paul/nfcsecondfactor0/UserDataPersistance.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/example/paul/nfcsecondfactor0/UserDataPersistance.java	(revision b81e5ce7b480ce161ae77698d85cf3fe59513413)
++++ app/src/main/java/com/example/paul/nfcsecondfactor0/UserDataPersistance.java	(revision )
+@@ -11,7 +11,7 @@
+     public static HashMap<String, User> userData = new HashMap<String, User>();
+ 
+     public static void fillUserData() {
+-        User testUser = new User("Paul", "pass", "email");
++        User testUser = new User("Paul", "pass", "email", "");
+         userData.put(testUser.getUserID(), testUser);
+     }
+ 
+Index: app/src/main/java/com/example/paul/nfcsecondfactor0/User.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/example/paul/nfcsecondfactor0/User.java	(revision b81e5ce7b480ce161ae77698d85cf3fe59513413)
++++ app/src/main/java/com/example/paul/nfcsecondfactor0/User.java	(revision )
+@@ -1,19 +1,39 @@
+ package com.example.paul.nfcsecondfactor0;
+ 
++import org.simpleframework.xml.Element;
++import org.simpleframework.xml.Root;
++
+ /**
+  * Created by Paul on 27/01/2016.
+  */
++
++@Root
+ public class User {
+ 
++    @Element
+     String userID;
++
++    @Element
+     String password;
++
++    @Element
+     String email;
++
++    @Element
+     String nfcCardID;
+ 
+-    public User(String userID, String password, String email, String nfcCardID) {
++    public User(@Element(name="userID") String userID, @Element(name="Password")String password, @Element(name="email") String email, @Element(name="nfcCardID") String nfcCardID) {
+         this.userID = userID;
+         this.password = password;
+         this.email = email;
++        this.nfcCardID = nfcCardID;
++    }
++
++    public String getNfcCardID() {
++        return nfcCardID;
++    }
++
++    public void setNfcCardID(String nfcCardID) {
+         this.nfcCardID = nfcCardID;
+     }
+ 

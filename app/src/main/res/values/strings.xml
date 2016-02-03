@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">NFC Second Factor</string>
+    <string name="reg_here">Register Here</string>
+    <string name="no_acct">Dont have an account?</string>
+</resources>
