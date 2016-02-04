@@ -15,6 +15,9 @@ package com.example.paul.nfcsecondfactor0.nfcSecondFactorServer;
  *
  */
 
+/**
+ *
+ */
 public class MockServices {
 
     UserDataPersistence udp = new UserDataPersistence();
@@ -24,6 +27,8 @@ public class MockServices {
     int AUTHENTICATED = 0;
 
     /**
+     ** Method to register a new user. Boolean return utilised to mock server faults thrown
+     * if username is already in use.
      *
      * @param userID
      * @param password
@@ -31,8 +36,6 @@ public class MockServices {
      * @param nfcCardID
      * @return boolean
      *
-     * Method to register a new user. Boolean return utilised to mock server faults thrown
-     * if username is already in use.
      */
     public Boolean registerUser(String userID, String password, String email, String nfcCardID) {
         //create new user
@@ -70,10 +73,6 @@ public class MockServices {
         }
         return returnValue;
     }
-
-    /**
-     * Method to seed the Server with an already registered user.
-     */
 
     /**
      * Method for test puposes only. Seeds the Hashmap with a user for proof only.
