@@ -12,7 +12,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 import com.example.paul.nfcsecondfactor0.R;
-import com.example.paul.nfcsecondfactor0.nfcSecondFactorServer.MockServer;
+import com.example.paul.nfcsecondfactor0.nfcSecondFactorServer.MockServices;
 import com.example.paul.nfcsecondfactor0.nfcSecondFactorServer.UserDataPersistence;
 
 
@@ -43,7 +43,7 @@ public class RegistrationActivity extends AppCompatActivity {
     private EditText userIDEditText, passwordEditText, reenterPasswordEditText, emailEditText;
     private ImageView nfcLogo, bTLogo, yorkLogo, loginIcon, pwIcon, emailIcon, repwIcon;
     private String nfcCardID = null;
-    private MockServer mockServer = new MockServer();
+    private MockServices mockServer = new MockServices();
     private PendingIntent pendingIntent;
 
     /**
@@ -115,7 +115,7 @@ public class RegistrationActivity extends AppCompatActivity {
                     mockServer.registerUser(userIDEditText.getText().toString(), passwordEditText.getText().toString(), emailEditText.getText().toString(), nfcCardID);
                     //add to hashmap and return to main intent
                     Intent returnToMainIntent = new Intent(RegistrationActivity.this, MainActivity.class);
-                    returnToMainIntent.putExtra(userIDEditText.getText().toString(), userIDEditText.getText().toString());
+                    returnToMainIntent.putExtra("newUserID", userIDEditText.getText().toString());
                     setResult(1, returnToMainIntent);
                     finish();
                     Toast.makeText(getApplicationContext(), "Your account has been created.", Toast.LENGTH_SHORT).show();
@@ -144,7 +144,6 @@ public class RegistrationActivity extends AppCompatActivity {
     @Override
     public void onNewIntent(Intent intent) {
         Tag myTag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-
         if (myTag != null) {
             nfcLogo.setImageResource(R.drawable.tick);
             getWindow().getDecorView().findViewById(android.R.id.content).invalidate();

@@ -18,7 +18,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.example.paul.nfcsecondfactor0.R;
-import com.example.paul.nfcsecondfactor0.nfcSecondFactorServer.MockServer;
+import com.example.paul.nfcsecondfactor0.nfcSecondFactorServer.MockServices;
 import com.example.paul.nfcsecondfactor0.nfcSecondFactorServer.UserDataPersistence;
 
 
@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
     private ImageView btLogo, yorkLogo, nfcLogo, loginIcon, pwIcon;
     private EditText userIDInput, passwordInput;
     private Button loginButton, registerButton;
-    private MockServer mockServer = new MockServer();
+    private MockServices mockServices = new MockServices();
     private UserDataPersistence udp = new UserDataPersistence();
     private NfcAdapter loginNfcAdapter;
 
@@ -88,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
         pwIcon = (ImageView) findViewById(R.id.passwordIcon);
         pwIcon.setImageResource(R.drawable.ic_lock_black_24dp);
 
-        //asign NFC logo
+        //assign NFC logo
         nfcLogo = (ImageView) findViewById(R.id.nfcLogo);
         nfcLogo.setImageResource(R.drawable.nfclogo);
 
@@ -123,11 +123,12 @@ public class MainActivity extends AppCompatActivity {
                 nfcLogo.setImageResource(R.drawable.nfclogo);
                 getWindow().getDecorView().findViewById(android.R.id.content).invalidate();
                 Intent newRegisterIntent = new Intent(MainActivity.this, RegistrationActivity.class);
+                passwordInput.setText("");
                 startActivityForResult(newRegisterIntent, 0);
             }
         });
         //populate hashmap with a test user
-        mockServer.seedUserData();
+        mockServices.seedUserData();
         //  nfc code
         loginNfcAdapter = NfcAdapter.getDefaultAdapter(this);
         //  check if there is an NFC capability of the phone
@@ -146,7 +147,7 @@ public class MainActivity extends AppCompatActivity {
      * the server can throw and appropriate output to the user.
      */
     private void authUser() {
-        int auth = mockServer.authenticateUser(userIDInput.getText().toString(), passwordInput.getText().toString(), nfcCardID);
+        int auth = mockServices.authenticateUser(userIDInput.getText().toString(), passwordInput.getText().toString(), nfcCardID);
         switch (auth) {
             case 0:
                 showToast("Login successful.");
@@ -174,8 +175,6 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(getApplicationContext(), string, Toast.LENGTH_LONG).show();
     }
 
-
-
     /**
      * Method is called when a new intent is thrown to the main activity. The logic then handles the
      * NFC data and captures the Ndef information and parses it. The card ID is then added to the userID
@@ -185,7 +184,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onNewIntent(Intent intent) {
         Tag myTag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-        mockServer.seedUserData();
+        mockServices.seedUserData();
 
         if (myTag != null) {
             nfcLogo.setImageResource(R.drawable.tick);
@@ -252,7 +251,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == 1) {
-            userIDInput.setText(data.getStringExtra(MainActivity.userID));
+            userIDInput.setText(data.getStringExtra("newUserID"));
         }
     }
 }
